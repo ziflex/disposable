@@ -10,7 +10,9 @@ npm i disposable-class
 
 ## Usage
 
-### As class
+[API](https://ziflex.github.io/disposable/)
+
+### As a class
 
 ```typescript
 import { Disposable } from 'disposable-class';
