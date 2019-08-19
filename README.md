@@ -1,0 +1,2 @@
+# disposable
+Disposable abstract class
