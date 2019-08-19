@@ -15,20 +15,26 @@ npm i disposable-class
 ```typescript
 import { Disposable } from 'disposable-class';
 
-class Repository extends Disposable {
-    private _conn: any;
+interface DbConnection {
+    close(): void;
+}
 
-    constructor() {
+class Repository extends Disposable {
+    private _conn: DbConnection;
+
+    constructor(conn: DbConnection) {
         super();
 
-        this._conn = new DbConnection();
+        this._conn = conn;
     }
 
     public dispose(): void {
-        // important to call in order to mark the class as disposed
-        super.dispose();
+        if (!this.isDisposed()) {
+            // important to call in order to mark the class as disposed
+            super.dispose();
 
-        this._conn.close();
+            this._conn.close();
+        }
     }
 }
 ```
@@ -38,12 +44,16 @@ class Repository extends Disposable {
 ```typescript
 import { disposable } from 'disposable-class';
 
+interface DbConnection {
+    close(): void;
+}
+
 @disposable
 class Repository {
     private _conn: DbConnection;
 
-    constructor() {
-        this._conn = new DbConnection();
+    constructor(conn: DbConnection) {
+        this._conn = conn;
     }
 
     public dispose(): void {
@@ -76,6 +86,8 @@ class Repository {
 #### Disposables
 
 ```typescript
+import { disposable, free } from 'disposable-class';
+
 @disposable
 class ResourceA {
     @free()
@@ -100,7 +112,11 @@ class ResourceB {
 #### Custom objects
 
 ```typescript
-import { disposable } from 'disposable-class';
+import { disposable, free } from 'disposable-class';
+
+interface DbConnection {
+    close(): void;
+}
 
 @disposable
 class Repository {
@@ -111,8 +127,8 @@ class Repository {
     @free({ call: 'close' })
     private _conn: { close: Function };
 
-    constructor() {
-        this._conn = new DbConnection();
+    constructor(conn: DbConnection) {
+        this._conn = conn;
     }
 }
 ```
@@ -120,19 +136,24 @@ class Repository {
 #### Custom objects 2
 
 ```typescript
-import { disposable } from 'disposable-class';
+import { disposable, free } from 'disposable-class';
+
+interface DbConnection {
+    close(): void;
+    isClosed(): boolean;
+}
 
 @disposable
 class Repository {
     // You can go wild
     @free({
         call: (conn: DbConnection) => conn.close(),
-        check: (conn: DbConnect) => conn.isClosed(),
+        check: (conn: DbConnection) => conn.isClosed(),
     })
     private _conn: DbConnection;
 
-    constructor() {
-        this._conn = new DbConnection();
+    constructor(conn: DbConnection) {
+        this._conn = conn;
     }
 }
 ```
@@ -140,7 +161,7 @@ class Repository {
 ### Methods protection
 
 ```typescript
-import { disposable, protect } from 'disposable-class';
+import { disposable, free, protect } from 'disposable-class';
 
 @disposable
 class List<T> {
@@ -172,8 +193,8 @@ class Repository {
     @free()
     private _conn: DbConnection;
 
-    constructor() {
-        this._conn = new DbConnection('localhost/my_database');
+    constructor(conn: DbConnection) {
+        this._conn = conn;
     }
 
     // One the instance gets disposed
