@@ -4,12 +4,13 @@
     "description": "Disposable abstract class",
     "main": "lib/index.js",
     "scripts": {
+        "gh-pages": "git subtree push --prefix docs origin gh-pages",
         "clean": "rimraf lib",
         "lint": "tslint -c tslint.json -p tsconfig.json 'src/**/*.ts'",
         "build": "cross-env NODE_ENV=production npm run clean && tsc -b tsconfig.json",
         "test": "rimraf coverage && cross-env NODE_ENV=test nyc mocha",
         "doc": "rimraf docs && typedoc --excludeProtected --excludePrivate --excludeNotExported --excludeExternals --out docs && touch docs/.nojekyll",
-        "fmt": "pretty-quick"
+        "fmt": "pretty-quick --pattern src/**/*.ts"
     },
     "repository": {
         "type": "git",

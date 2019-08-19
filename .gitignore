@@ -24,7 +24,6 @@ classes/
 *.tern-project
 **/.DS_Store
 dump.rdb
-**/docs
 .DS_Store
 .npmrc
 yarn.lock
