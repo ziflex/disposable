@@ -2,6 +2,9 @@
 
 > Disposable abstract class
 
+[![npm version](https://badge.fury.io/js/disposable-class.svg)](https://www.npmjs.com/package/disposable-class)
+[![Actions Status](https://github.com/ziflex/disposable/workflows/Node%20CI/badge.svg)](https://github.com/ziflex/disposable/workflows/Node%20CI/badge.svg)
+
 ## Installation
 
 ```bash

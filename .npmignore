@@ -1,0 +1,10 @@
+src/
+test/
+node_modules/
+docs/
+.github/
+.nyc_output/
+.huskyrc.json
+.prettierrc.yaml
+tsconfig.json
+tslint.json
