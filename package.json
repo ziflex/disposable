@@ -1,0 +1,50 @@
+{
+    "name": "disposable-class",
+    "version": "1.0.0",
+    "description": "Disposable abstract class",
+    "main": "lib/index.js",
+    "scripts": {
+        "clean": "rimraf lib",
+        "lint": "tslint -c tslint.json -p tsconfig.json 'src/**/*.ts'",
+        "build": "cross-env NODE_ENV=production npm run clean && tsc -b tsconfig.json",
+        "test": "rimraf coverage && cross-env NODE_ENV=test nyc mocha",
+        "doc": "rimraf docs && typedoc --excludeProtected --excludePrivate --excludeNotExported --excludeExternals --out docs && touch docs/.nojekyll",
+        "fmt": "pretty-quick"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ziflex/disposable.git"
+    },
+    "keywords": [
+        "typescript",
+        "class",
+        "disposable"
+    ],
+    "author": "Tim Voronov",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/ziflex/disposable/issues"
+    },
+    "homepage": "https://github.com/ziflex/disposable#readme",
+    "devDependencies": {
+        "@types/chai": "^4.2.0",
+        "@types/mocha": "^5.2.7",
+        "@types/sinon": "^7.0.13",
+        "chai": "^4.2.0",
+        "cross-env": "^5.2.0",
+        "husky": "^3.0.4",
+        "mocha": "^6.2.0",
+        "nyc": "^14.1.1",
+        "prettier": "^1.18.2",
+        "pretty-quick": "^1.11.1",
+        "rimraf": "^3.0.0",
+        "sinon": "^7.4.1",
+        "source-map-support": "^0.5.13",
+        "ts-node": "^8.3.0",
+        "tslint": "^5.18.0",
+        "tslint-config-airbnb": "^5.11.1",
+        "tslint-config-prettier": "^1.18.0",
+        "typedoc": "^0.15.0",
+        "typescript": "^3.5.3"
+    }
+}
