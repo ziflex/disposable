@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 const isDisposedSym = Symbol('isDisposed');
 const resourcesSym = Symbol('disposable resources');
 const isDisposedProp = 'isDisposed';
@@ -60,7 +61,7 @@ export abstract class Disposable implements DisposableObject {
      * Indicates if a given object implements [[DisposableObject]] interface.
      * @param object - Target object.
      */
-    public static isDisposable(object?: any): boolean {
+    public static isDisposable(object?: Record<string, any>): boolean {
         if (object == null) {
             return false;
         }
@@ -79,8 +80,8 @@ export abstract class Disposable implements DisposableObject {
      * @param deref - A value indicating whether to perform dereferncing.
      */
     public static dispose(
-        object: DisposableObject | Object,
-        deref: boolean = false,
+        object: DisposableObject | Record<string, any>,
+        deref = false,
     ): void {
         const disposable = object as DisposableObject;
 
@@ -103,17 +104,16 @@ export abstract class Disposable implements DisposableObject {
      * @param object - Target object.
      * @param keys - Keys to dereference. Optional. By default all keys will be dereferenced.
      */
-    public static dereference(object: Object, keys?: Property[]): void {
+    public static dereference(
+        object: Record<string, any>,
+        keys?: Property[],
+    ): void {
         const target = object;
-        let targetKeys: Property[] = keys;
-
-        if (targetKeys == null) {
-            targetKeys = Object.keys(object);
-        }
+        const targetKeys: Property[] = keys || Object.keys(object);
 
         targetKeys.forEach((key: Property) => {
             if (typeof key === 'string' || typeof key === 'symbol') {
-                const resource = target[key];
+                const resource = target[key as any];
 
                 if (Disposable.isDisposable(resource)) {
                     if (!resource.isDisposed()) {
@@ -121,10 +121,10 @@ export abstract class Disposable implements DisposableObject {
                     }
                 }
 
-                target[key] = undefined;
+                target[key as any] = undefined;
             } else {
                 const alias = key as Alias;
-                const resource = target[alias.key];
+                const resource = target[alias.key as any];
 
                 // Resource is not available anymore
                 // Nothing to do here
@@ -174,7 +174,7 @@ export abstract class Disposable implements DisposableObject {
                 }
 
                 // Bye bye
-                target[alias.key] = undefined;
+                target[alias.key as any] = undefined;
             }
         });
     }
@@ -183,7 +183,7 @@ export abstract class Disposable implements DisposableObject {
      * Indicates whether the instance is already disposed.
      */
     public isDisposed(): boolean {
-        return this[isDisposedSym] === true;
+        return (this as any)[isDisposedSym] === true;
     }
 
     /**
@@ -191,11 +191,11 @@ export abstract class Disposable implements DisposableObject {
      * For actual resource clean up, derived classes should override the method.
      */
     public dispose(): void {
-        if (!this[isDisposedSym]) {
-            this[isDisposedSym] = true;
+        if (!(this as any)[isDisposedSym]) {
+            (this as any)[isDisposedSym] = true;
 
             // resources set by decorators
-            const resources = this[resourcesSym] as Array<Property>;
+            const resources = (this as any)[resourcesSym] as Array<Property>;
 
             if (resources != null) {
                 Disposable.dereference(this, resources);
@@ -209,6 +209,7 @@ export abstract class Disposable implements DisposableObject {
  * Makes a given class disposable.
  * @param target
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export const disposable: ClassDecorator = <T extends Function>(target: T) => {
     // If alread is disposable
     if (Disposable.isDisposable(target)) {
@@ -221,14 +222,14 @@ export const disposable: ClassDecorator = <T extends Function>(target: T) => {
     );
 
     if (isDisposedDescr == null) {
-        Object.defineProperty(
-            target.prototype,
+        const desc = Object.getOwnPropertyDescriptor(
+            Disposable.prototype,
             isDisposedProp,
-            Object.getOwnPropertyDescriptor(
-                Disposable.prototype,
-                isDisposedProp,
-            ),
         );
+
+        if (desc) {
+            Object.defineProperty(target.prototype, isDisposedProp, desc);
+        }
     }
 
     const disposeDescr = Object.getOwnPropertyDescriptor(
@@ -237,11 +238,14 @@ export const disposable: ClassDecorator = <T extends Function>(target: T) => {
     );
 
     if (disposeDescr == null) {
-        Object.defineProperty(
-            target.prototype,
+        const desc = Object.getOwnPropertyDescriptor(
+            Disposable.prototype,
             disposeProp,
-            Object.getOwnPropertyDescriptor(Disposable.prototype, disposeProp),
         );
+
+        if (desc) {
+            Object.defineProperty(target.prototype, disposeProp, desc);
+        }
     } else {
         const original = disposeDescr.value;
 
@@ -272,12 +276,13 @@ export interface FreeDecoratorConfig {
 export const free: (config?: FreeDecoratorConfig) => PropertyDecorator = (
     config?: FreeDecoratorConfig,
 ) => {
-    return (target: Object, propertyKey: string | symbol) => {
-        let resources: Property[] = target[resourcesSym];
+    return (target: Record<string, any>, propertyKey: string | symbol) => {
+        let resources: Property[] = target[resourcesSym as any];
 
         if (resources == null) {
             resources = [];
-            target[resourcesSym] = resources;
+            // eslint-disable-next-line no-param-reassign
+            target[resourcesSym as any] = resources;
         }
 
         if (config == null) {
@@ -309,13 +314,18 @@ export const protect: (config?: ProtectDecoratorConfig) => MethodDecorator = (
     config?: ProtectDecoratorConfig,
 ) => {
     return (
-        __: Object,
+        __: Record<string, any>,
         _: string | symbol,
         descriptor: TypedPropertyDescriptor<any>,
     ) => {
         const original = descriptor.value;
-        descriptor.value = function(this: DisposableObject): any {
+
+        // eslint-disable-next-line no-param-reassign
+        descriptor.value = function ProtectedFunction(
+            this: DisposableObject,
+        ): any {
             if (this.isDisposed == null || !this.isDisposed()) {
+                // eslint-disable-next-line prefer-rest-params
                 return original.apply(this, arguments);
             }
 
