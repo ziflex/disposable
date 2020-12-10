@@ -15,6 +15,32 @@ npm i disposable-class
 
 [API](https://ziflex.github.io/disposable/)
 
+### As a decorator
+
+```typescript
+import { disposable } from 'disposable-class';
+
+interface DbConnection {
+    close(): void;
+}
+
+@disposable
+class Repository {
+    private _conn: DbConnection;
+
+    constructor(conn: DbConnection) {
+        this._conn = conn;
+    }
+
+    public dispose(): void {
+        // with decorator you do not have to call super.dispose();
+        // the decorator does it automatically
+
+        this._conn.close();
+    }
+}
+```
+
 ### As a class
 
 ```typescript
@@ -40,32 +66,6 @@ class Repository extends Disposable {
 
             this._conn.close();
         }
-    }
-}
-```
-
-### As a decorator
-
-```typescript
-import { disposable } from 'disposable-class';
-
-interface DbConnection {
-    close(): void;
-}
-
-@disposable
-class Repository {
-    private _conn: DbConnection;
-
-    constructor(conn: DbConnection) {
-        this._conn = conn;
-    }
-
-    public dispose(): void {
-        // with decorator you do not have to call super.dispose();
-        // the decorator does it automatically
-
-        this._conn.close();
     }
 }
 ```
@@ -178,7 +178,7 @@ class List<T> {
     }
 
     // Onсe the instance gets disposed
-    // All further function calls will be ignored
+    // All further function calls will be ignored and DisposedError will be thrown
     @protect()
     public add(item: T): void {
         // It's very important to protect methods that use properties that marked as freeable
@@ -202,8 +202,8 @@ class Repository {
         this._conn = conn;
     }
 
-    // One the instance gets disposed
-    // All further function calls will
+    // Once the instance gets disposed
+    // All further function calls will return rejected Promise
     @protect({ async: true })
     public async findOne(query: any): void {
         return this._conn.findOne(query);
