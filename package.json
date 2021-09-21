@@ -10,7 +10,8 @@
         "fmt": "pretty-quick --pattern src/**/*.ts",
         "build": "cross-env NODE_ENV=production npm run clean && npm run fmt && npm run lint && tsc -b tsconfig.json",
         "test": "rimraf coverage && cross-env NODE_ENV=test nyc mocha",
-        "doc": "rimraf docs && typedoc --excludeProtected --excludePrivate --excludeNotExported --excludeExternals --out docs && touch docs/.nojekyll"
+        "doc": "rimraf docs && typedoc --excludeProtected --excludePrivate --excludeNotExported --excludeExternals --out docs && touch docs/.nojekyll",
+        "prepublish": "npm run test && npm run build"
     },
     "repository": {
         "type": "git",
