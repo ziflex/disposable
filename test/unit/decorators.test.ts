@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable max-classes-per-file */
 import { expect } from 'chai';
 import sinon, { SinonSpy } from 'sinon';
@@ -68,6 +69,8 @@ describe('Decorators', () => {
 
                     this.name = name;
                     this.__age = age;
+
+                    console.log(this.__age);
                 }
             }
 
@@ -78,7 +81,7 @@ describe('Decorators', () => {
             f.dispose();
 
             expect(f.name).to.not.exist;
-            expect(f.__age).to.not.exist;
+            expect((f as any).__age).to.not.exist;
         });
 
         it('should use alias for close', () => {
